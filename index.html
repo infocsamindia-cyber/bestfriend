@@ -567,6 +567,7 @@ function scatterLayout(animate){
    ------------------------------------------------------------------ */
 function gridLayout(){
   layoutMode = 'grid';
+  cardEls.forEach(el => el.classList.remove('flipped'));
   const rect = canvas.getBoundingClientRect();
   const isMobile = window.innerWidth < 700;
   const cols = isMobile ? 2 : 3;
@@ -738,4 +739,4 @@ window.addEventListener('resize', () => {
 })();
 </script>
 </body>
-</html>
+  </html>
