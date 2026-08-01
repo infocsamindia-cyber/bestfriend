@@ -108,6 +108,63 @@
   .intro-enter:hover{ background: var(--ink); color: var(--bg); transform: translateY(-2px); }
 
   /* ============================================================
+     LOGIN GATE — a small, sincere joke: only she has the password.
+     Sits above the intro; unlocking reveals it underneath.
+     ============================================================ */
+  #login-gate{
+    position: fixed; inset:0; z-index: 110;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--bg);
+    padding: 8vw;
+    transition: opacity .6s ease, visibility .6s ease;
+  }
+  #login-gate.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  .login-card{
+    width: 100%; max-width: 340px;
+    text-align:center;
+  }
+  .login-eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size: 11px; letter-spacing:.14em;
+    text-transform:uppercase; color: var(--ink-soft); margin-bottom: 14px;
+  }
+  .login-title{
+    font-family:'Fraunces', serif; font-weight:450; font-style:italic;
+    font-size: clamp(26px, 6vw, 34px); margin: 0 0 30px; color: var(--ink);
+  }
+  .login-field{
+    display:block; text-align:left; margin-bottom: 16px;
+  }
+  .login-label{
+    display:block; font-family:'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing:.08em; text-transform:uppercase; color: var(--ink-soft); margin-bottom: 7px;
+  }
+  .login-input{
+    width:100%; font-family:'Inter', sans-serif; font-size: 15px;
+    padding: 13px 14px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--paper); color: var(--ink); outline:none;
+    transition: border-color .25s ease;
+  }
+  .login-input:focus{ border-color: var(--rose); }
+  .login-input--locked{ color: var(--ink-soft); cursor: not-allowed; }
+  .login-submit{
+    width:100%; margin-top: 6px; font-family:'JetBrains Mono', monospace; font-size: 13px;
+    letter-spacing:.04em; padding: 14px; border-radius: 10px; border: none;
+    background: var(--ink); color: var(--bg); cursor:pointer;
+    transition: transform .25s ease, background .25s ease;
+  }
+  .login-submit:hover{ transform: translateY(-2px); }
+  .login-feedback{
+    min-height: 18px; margin: 12px 0 0; font-family:'JetBrains Mono', monospace;
+    font-size: 11.5px; color: var(--rose);
+  }
+  .login-card.shake{ animation: shake .4s ease; }
+  @keyframes shake{
+    0%,100%{ transform: translateX(0); }
+    25%{ transform: translateX(-8px); }
+    75%{ transform: translateX(8px); }
+  }
+
+  /* ============================================================
      STUDIO HEADER — fixed, minimal, tells you what this is
      ============================================================ */
   #studio-header{
@@ -195,6 +252,17 @@
   .photo-wrap img{
     width:100%; height:100%; object-fit:cover; display:block;
     filter: saturate(1.02) contrast(1.02);
+  }
+  /* graceful fallback if a photo genuinely can't load — a soft fabric-swatch
+     look instead of an ugly broken-image box, matching the studio palette */
+  .photo-wrap.no-photo{
+    background: repeating-linear-gradient(135deg, var(--paper-edge), var(--paper-edge) 8px, var(--paper) 8px, var(--paper) 16px);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .photo-wrap.no-photo::after{
+    content:"swatch pending";
+    font-family:'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing:.05em;
+    color: var(--ink-soft);
   }
   .tape{
     position:absolute; top:-10px; left:50%; transform: translateX(-50%) rotate(-3deg);
@@ -314,6 +382,26 @@
 <body>
 
 <div class="grain"></div>
+
+<!-- ================= LOGIN GATE ================= -->
+<div id="login-gate">
+  <div class="login-card">
+    <div class="login-eyebrow">// Access Control — this desk is private</div>
+    <h1 class="login-title">who's opening this?</h1>
+    <form id="loginForm" autocomplete="off">
+      <label class="login-field">
+        <span class="login-label">Username</span>
+        <input type="text" value="besti" disabled class="login-input login-input--locked">
+      </label>
+      <label class="login-field">
+        <span class="login-label">Password</span>
+        <input type="password" id="loginPass" class="login-input" placeholder="you know this one" autofocus>
+      </label>
+      <button type="submit" class="login-submit">Unlock Studio →</button>
+      <p class="login-feedback" id="loginFeedback"></p>
+    </form>
+  </div>
+</div>
 
 <!-- ================= INTRO ================= -->
 <div id="intro">
@@ -490,6 +578,25 @@ const CARDS = [
    Image source: picsum, one distinct seed per card (random=1..15)
    per brief. Front/back markup assembled from the CARDS content.
    ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------
+   IMAGE FALLBACK — if a specific sakshi-0X.jpg is missing/broken,
+   quietly try the other seven real photos instead of showing a
+   broken image icon. Only after all eight fail does it show the
+   soft "swatch pending" placeholder instead of an ugly black box.
+   ------------------------------------------------------------------ */
+function handleImgError(img){
+  let attempt = parseInt(img.dataset.attempt || '0', 10) + 1;
+  img.dataset.attempt = attempt;
+  if (attempt <= 8){
+    const idx = ((attempt - 1) % 8) + 1;
+    img.src = `images/sakshi-${String(idx).padStart(2,'0')}.jpg`;
+  } else {
+    const wrap = img.closest('.photo-wrap');
+    if (wrap) wrap.classList.add('no-photo');
+    img.remove();
+  }
+}
+
 const canvas = document.getElementById('canvas');
 const canvasInner = document.getElementById('canvas-inner');
 const cardEls = [];
@@ -509,7 +616,12 @@ function buildCards(){
               <div class="tape"></div>
               <div class="photo-wrap">
                 <div class="pin"></div>
-                <img src="images/sakshi-${String(((id - 1) % 8) + 1).padStart(2,'0')}.jpg" alt="Sakshi — studio moodboard photo ${id}" draggable="false" oncontextmenu="return false;">
+                <img
+                  src="images/sakshi-${String(((id - 1) % 8) + 1).padStart(2,'0')}.jpg"
+                  alt="Sakshi — studio moodboard photo ${id}"
+                  draggable="false"
+                  oncontextmenu="return false;"
+                  onerror="handleImgError(this)">
               </div>
               <div class="front-caption">${data.caption}</div>
               <div class="front-index">#${String(id).padStart(2,'0')}</div>
@@ -702,6 +814,26 @@ document.getElementById('btnDark').addEventListener('click', () => {
    ------------------------------------------------------------------ */
 document.getElementById('enterBtn').addEventListener('click', () => {
   document.getElementById('intro').classList.add('hidden');
+});
+
+/* ------------------------------------------------------------------
+   LOGIN GATE — the only correct password is her own name. Anything
+   else gets a gentle nudge, not an error message.
+   ------------------------------------------------------------------ */
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const pass = document.getElementById('loginPass').value.trim().toLowerCase();
+  const feedback = document.getElementById('loginFeedback');
+  const card = document.querySelector('.login-card');
+
+  if (pass === 'sakshi'){
+    document.getElementById('login-gate').classList.add('hidden');
+  } else {
+    feedback.textContent = "not it — hint: it's the name on the door";
+    card.classList.remove('shake');
+    void card.offsetWidth; // restart animation
+    card.classList.add('shake');
+  }
 });
 
 /* ------------------------------------------------------------------
