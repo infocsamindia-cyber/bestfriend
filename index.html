@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
@@ -172,9 +172,10 @@
      STUDIO HEADER — fixed, minimal, tells you what this is
      ============================================================ */
   #studio-header{
-    position: fixed; top:0; left:0; right:0; z-index: 40;
+    position: fixed; top:0; left:0; right:0; z-index: 500;
     display:flex; align-items:flex-start; justify-content:space-between;
     padding: 22px 26px; pointer-events:none;
+    background: linear-gradient(180deg, var(--bg) 55%, transparent 100%);
   }
   .brand{ pointer-events:auto; }
   .brand-name{
@@ -211,7 +212,7 @@
     position:absolute;
     width: 186px; height: 250px;
     left:0; top:0;
-    touch-action: none;
+    touch-action: pan-y;
     cursor: grab;
     will-change: left, top;
   }
@@ -327,7 +328,7 @@
      ============================================================ */
   #dock{
     position: fixed; left:50%; bottom: 22px; transform: translateX(-50%);
-    z-index: 60;
+    z-index: 490;
     display:flex; align-items:center; gap: 4px;
     background: var(--paper);
     border: 1px solid var(--line);
@@ -350,7 +351,7 @@
   /* toast */
   #toast{
     position: fixed; left:50%; bottom: 92px; transform: translateX(-50%) translateY(8px);
-    z-index: 70; opacity:0; pointer-events:none;
+    z-index: 510; opacity:0; pointer-events:none;
     background: var(--ink); color: var(--bg);
     font-family:'JetBrains Mono', monospace; font-size:11.5px; letter-spacing:.03em;
     padding: 9px 16px; border-radius: 999px;
@@ -359,7 +360,7 @@
   #toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
 
   #credit-badge{
-    position: fixed; right: 16px; bottom: 16px; z-index: 55;
+    position: fixed; right: 16px; bottom: 16px; z-index: 480;
     font-family:'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing:.03em;
     color: var(--ink-soft); background: var(--paper); border: 1px solid var(--line);
     padding: 6px 10px; border-radius: 999px; pointer-events:none;
@@ -446,8 +447,8 @@
     <i data-lucide="shuffle"></i><span class="label">Scatter Moodboard</span>
   </button>
   <div class="dock-sep"></div>
-  <button class="dock-btn" id="btnDark" title="Dark Room Vibe">
-    <i data-lucide="moon"></i><span class="label">Dark Room Vibe</span>
+  <button class="dock-btn" id="btnDark" title="Light Mode">
+    <i data-lucide="sun"></i><span class="label">Light Mode</span>
   </button>
 </nav>
 
@@ -476,105 +477,105 @@ const CARDS = [
     tag: "Memory_Log #01",
     selector: ".canteen-critique",
     props: { fabric: '"banarasi brocade"', mood: '"dusty-rose, unbothered"', deadline: "yesterday" },
-    note: "you were right about the fabric. it always is."
+    note: "fabric ke baare mein tu hamesha sahi hoti hai, ek baar bhi galat nahi hui."
   },
   {
     caption: "The MCASC degree show, 11:58pm setup. Three of us, one glue gun, zero working brain cells.",
     tag: "Memory_Log #02",
     selector: ".degree-show::before",
     props: { squad_size: 3, glue_guns: 1, panic_level: "critical" },
-    note: "somehow the boards still looked better than mine."
+    note: "pata nahi kaise, tere boards mere se hamesha zyada achhe dikhte the."
   },
   {
     caption: "You sketch faster than I can debug. That's not a compliment, that's just a fact I have to live with.",
     tag: "Memory_Log #03",
     selector: ".sketchbook:nth-child(9999)",
     props: { render_time: "0.4s", my_render_time: "∞" },
-    note: "some people compile, some people draft. same energy."
+    note: "koi code compile karta hai, koi sketch draft karta hai — energy dono ki same hai."
   },
   {
     caption: "Farewell function, this dusty-rose lehenga you picked apart for a week before deciding it was 'the one.'",
     tag: "Memory_Log #04",
     selector: ".final-fitting",
     props: { revisions: 14, verdict: '"the one"', confidence: "finally 100%" },
-    note: "worth every one of the fourteen tries."
+    note: "chaudah baar try karna bhi sahi tha, outfit bilkul perfect nikla tha."
   },
   {
     caption: "MCASC canteen, 4pm chai, you redesigning my portfolio grid on a napkin because 'the spacing was hurting you.'",
     tag: "Memory_Log #05",
     selector: ".napkin-wireframe",
     props: { medium: '"paper napkin"', margin_opinions: "strong" },
-    note: "the napkin version shipped better than my figma file."
+    note: "napkin wala design mere Figma file se bhi zyada accha chala tha."
   },
   {
     caption: "Every squad photo has you adjusting someone's dupatta a second before the shutter goes off. Every single one.",
     tag: "Memory_Log #06",
     selector: ".pre-shutter-fix",
     props: { reaction_time: "0.2s", frequency: "always" },
-    note: "you're the unpaid stylist of every group photo we own."
+    note: "tu hi hai humari har group photo ki bina-salary wali stylist."
   },
   {
     caption: "The day you told me 'good design is just good manners' and I stole that line for my thesis viva.",
     tag: "Memory_Log #07",
     selector: ".viva-defense",
     props: { line_stolen: true, credited: "quietly, now, in writing" },
-    note: "consider this the footnote I owed you."
+    note: "yeh wahi footnote hai jo maine tujhe dena tha, aaj de diya."
   },
   {
     caption: "You color-code your moodboards. I color-code my terminal. We are, somehow, the same person.",
     tag: "Memory_Log #08",
     selector: ".shared-brain",
     props: { your_palette: "5 swatches", my_palette: "5 hex codes" },
-    note: "different tools, identical need for control."
+    note: "tools alag hain apne apne, par control ki zaroorat dono ko barabar hai."
   },
   {
     caption: "That semester you hand-embroidered a sample at 2am because the machine version 'had no soul.'",
     tag: "Memory_Log #09",
     selector: ".2am-embroidery",
     props: { method: '"by hand"', reason: '"soul, apparently"' },
-    note: "the machine one was fine. this one was better."
+    note: "machine wala bhi thik tha, par haath se bana wala zyada accha tha."
   },
   {
     caption: "The photoshoot day, this exact gold brocade set, and you still asked 'does this read as too much?' Sakshi. No.",
     tag: "Memory_Log #10",
     selector: ".too-much-check",
     props: { verdict: "never too much", asked_anyway: true },
-    note: "you always ask. the answer is always no."
+    note: "tu hamesha poochti hai, aur jawab hamesha 'nahi, bilkul nahi' hota hai."
   },
   {
     caption: "Group project, MCASC 3rd year — you carried the layout, I carried the excuses. Fair division of labour.",
     tag: "Memory_Log #11",
     selector: ".group-project-split",
     props: { your_contribution: "90%", my_contribution: '"moral support"' },
-    note: "the grade was yours. the credit should've been too."
+    note: "grade tera tha, credit bhi tujhe hi milna chahiye tha."
   },
   {
     caption: "Every fitting room mirror selfie has the same caption energy: 'idk if this works.' It always works.",
     tag: "Memory_Log #12",
     selector: ".mirror-selfie",
     props: { self_doubt: "recurring", accuracy: "0%" },
-    note: "for the record — it has never once not worked."
+    note: "yeh likh ke rakh le — kabhi bhi outfit galat nahi laga, ek baar bhi nahi."
   },
   {
     caption: "You once fixed my entire portfolio layout in the time it took me to explain the problem. Ten minutes flat.",
     tag: "Memory_Log #13",
     selector: ".portfolio-rescue",
     props: { time_taken: "10min", debt_owed: "eternal" },
-    note: "this website is my very late thank-you."
+    note: "yeh website meri bahut late wali thank-you hai, par dil se hai."
   },
   {
     caption: "MCASC hallway, last week of college, taking photos we swore we'd never need — and now they're all I've got.",
     tag: "Memory_Log #14",
     selector: ".hallway-goodbye",
     props: { swore_wed_forget: true, forgot: false },
-    note: "turns out we needed every single one."
+    note: "pata chala humein har ek photo ki zaroorat thi, ek bhi kam nahi thi."
   },
   {
     caption: "Happy Friendship Day, Sakshi. From the wireframes to the runway, you made everything look intentional — including us.",
     tag: "Memory_Log #15",
     selector: ".friendship-day::after",
     props: { status: '"still best friends"', build: "passing", love: "shipped" },
-    note: "— from your developer best friend, Ayan."
+    note: "tu bahut achi hai Sakshi, har cheez mein sabka support karti hai — bas yehi kehna tha. tera developer best friend, Ayan."
   }
 ];
 
@@ -737,51 +738,79 @@ function gridLayout(){
    ------------------------------------------------------------------ */
 function enableDrag(el){
   let startX = 0, startY = 0, originLeft = 0, originTop = 0, startTime = 0;
-  let dragging = false;
-  const DRAG_THRESHOLD = 10;
-  const TAP_MAX_DURATION = 350; // ms — beyond this, a still finger is a hesitant scroll/hold, not a tap
+  let dragging = false;      // true once we've committed to a drag
+  let holdTimer = null;      // fires if the finger stays still long enough to mean "pick this up"
+  let activePointerId = null;
+  const MOVE_CANCEL_THRESHOLD = 10; // movement beyond this before the hold fires = a scroll/swipe, not a drag
+  const HOLD_MS = 190;        // deliberate press-and-hold before a card "lifts off" the desk
+  const TAP_MAX_DURATION = 350;
+
+  function beginDrag(e){
+    dragging = true;
+    el.classList.add('dragging');
+    el.setPointerCapture(activePointerId);
+    el.style.touchAction = 'none'; // lock out scrolling only while this specific drag is live
+  }
 
   el.addEventListener('pointerdown', (e) => {
-    el.setPointerCapture(e.pointerId);
     startX = e.clientX;
     startY = e.clientY;
     startTime = Date.now();
     originLeft = parseFloat(el.style.left) || 0;
     originTop = parseFloat(el.style.top) || 0;
     dragging = false;
+    activePointerId = e.pointerId;
     zTop += 1;
     el.style.zIndex = zTop;
+
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => {
+      // still roughly in place after HOLD_MS — treat as "pick up to drag"
+      beginDrag(e);
+    }, HOLD_MS);
   });
 
   el.addEventListener('pointermove', (e) => {
-    if (!el.hasPointerCapture(e.pointerId)) return;
+    if (e.pointerId !== activePointerId) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
-    if (!dragging && Math.hypot(dx, dy) > DRAG_THRESHOLD){
-      dragging = true;
-      el.classList.add('dragging');
+
+    if (!dragging){
+      // moved enough, this early, that it reads as a scroll/swipe — let the browser handle it natively
+      if (Math.hypot(dx, dy) > MOVE_CANCEL_THRESHOLD){
+        clearTimeout(holdTimer);
+      }
+      return;
     }
-    if (dragging){
-      const rect = canvas.getBoundingClientRect();
-      const w = el.offsetWidth, h = el.offsetHeight;
-      let nl = originLeft + dx;
-      let nt = originTop + dy;
-      nl = Math.max(-w * 0.3, Math.min(rect.width - w * 0.7, nl));
-      nt = Math.max(-h * 0.15, Math.min(canvasInner.offsetHeight - h * 0.4, nt));
-      el.style.left = nl + 'px';
-      el.style.top = nt + 'px';
-    }
+
+    const rect = canvas.getBoundingClientRect();
+    const w = el.offsetWidth, h = el.offsetHeight;
+    let nl = originLeft + dx;
+    let nt = originTop + dy;
+    nl = Math.max(-w * 0.3, Math.min(rect.width - w * 0.7, nl));
+    nt = Math.max(-h * 0.15, Math.min(canvasInner.offsetHeight - h * 0.4, nt));
+    el.style.left = nl + 'px';
+    el.style.top = nt + 'px';
   });
 
-  el.addEventListener('pointerup', (e) => {
-    el.releasePointerCapture(e.pointerId);
+  function endGesture(e){
+    if (e.pointerId !== activePointerId) return;
+    clearTimeout(holdTimer);
+    if (dragging){
+      el.releasePointerCapture(activePointerId);
+      el.style.touchAction = 'pan-y';
+    }
     el.classList.remove('dragging');
     const heldTime = Date.now() - startTime;
     if (!dragging && heldTime <= TAP_MAX_DURATION){
       el.classList.toggle('flipped');
     }
     dragging = false;
-  });
+    activePointerId = null;
+  }
+
+  el.addEventListener('pointerup', endGesture);
+  el.addEventListener('pointercancel', endGesture);
 
   el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
@@ -812,7 +841,10 @@ document.getElementById('btnDark').addEventListener('click', () => {
   const root = document.documentElement;
   const dark = root.getAttribute('data-theme') === 'dark';
   root.setAttribute('data-theme', dark ? 'light' : 'dark');
-  document.getElementById('btnDark').querySelector('i').setAttribute('data-lucide', dark ? 'moon' : 'sun');
+  const btn = document.getElementById('btnDark');
+  btn.querySelector('i').setAttribute('data-lucide', dark ? 'moon' : 'sun');
+  btn.querySelector('.label').textContent = dark ? 'Dark Room Vibe' : 'Light Mode';
+  btn.title = dark ? 'Dark Room Vibe' : 'Light Mode';
   if (window.lucide) lucide.createIcons();
   showToast(dark ? 'lights back on' : 'dark room vibe — colours pop now');
 });
@@ -891,4 +923,4 @@ window.addEventListener('resize', () => {
 })();
 </script>
 </body>
-</html>
+  </html>
