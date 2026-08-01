@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<title>Sakshi's Studio Canvas // Dev ✕ Designer Edition</title>
+
+<!-- Fonts: an editorial serif for the "designer" voice, a clean grotesk for the "dev" voice, mono for spec sheets -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,450;0,9..144,600;1,9..144,450&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Optional CDN tooling, per brief -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  /* ============================================================
+     TOKENS — token system per brief:
+     bg (studio cream) / ink (deep neutral) / rose (accent) /
+     gold (echoes the brocade in her photos) / paper (card stock)
+     ============================================================ */
+  :root{
+    --bg: #fcfbfa;
+    --ink: #1c1b1a;
+    --ink-soft: #6b6864;
+    --rose: #e05375;
+    --gold: #c39a6b;
+    --paper: #f6f1e9;
+    --paper-edge: #e7ddcd;
+    --line: rgba(28,27,26,0.12);
+    --shadow: rgba(28,27,26,0.18);
+    --code-bg: #17181a;
+    --code-line: rgba(255,255,255,0.08);
+    --canvas-bg: var(--bg);
+    --canvas-grain: rgba(28,27,26,0.03);
+    transition: background-color .5s ease, color .5s ease;
+  }
+
+  html[data-theme="dark"]{
+    --bg: #121110;
+    --ink: #f3efe8;
+    --ink-soft: #a9a39a;
+    --paper: #1d1c1a;
+    --paper-edge: #2c2a26;
+    --line: rgba(243,239,232,0.12);
+    --shadow: rgba(0,0,0,0.55);
+    --code-bg: #0b0c0d;
+    --code-line: rgba(255,255,255,0.07);
+    --canvas-bg: #0f0e0d;
+    --canvas-grain: rgba(255,255,255,0.025);
+  }
+
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  img{ -webkit-user-drag: none; user-select: none; pointer-events: none; }
+
+  ::selection{ background: var(--rose); color: #fff; }
+
+  /* subtle paper grain overlay across the whole studio */
+  .grain{
+    position: fixed; inset:0; pointer-events:none; z-index: 5; opacity: .5;
+    background-image: radial-gradient(var(--canvas-grain) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+
+  /* ============================================================
+     INTRO — the hero moment. One characteristic line, then in.
+     ============================================================ */
+  #intro{
+    position: fixed; inset:0; z-index: 100;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background: var(--bg);
+    text-align:center; padding: 8vw;
+    transition: opacity .9s ease, visibility .9s ease;
+  }
+  #intro.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  .intro-eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.22em;
+    text-transform:uppercase; color: var(--rose); margin-bottom: 22px;
+  }
+  .intro-title{
+    font-family:'Fraunces', serif; font-weight:450; font-style:italic;
+    font-size: clamp(28px, 5.4vw, 64px); line-height:1.12; max-width: 920px;
+    color: var(--ink);
+  }
+  .intro-title b{ font-weight:600; font-style:normal; color: var(--rose); }
+  .intro-sub{
+    margin-top:22px; max-width:460px; font-size:15px; line-height:1.6; color: var(--ink-soft);
+  }
+  .intro-enter{
+    margin-top:44px; font-family:'JetBrains Mono', monospace; font-size:13px;
+    letter-spacing:.05em; padding: 15px 30px; border-radius: 999px;
+    border: 1px solid var(--ink); background: transparent; color: var(--ink);
+    cursor:pointer; display:flex; align-items:center; gap:10px;
+    transition: background .3s ease, color .3s ease, transform .3s ease;
+  }
+  .intro-enter:hover{ background: var(--ink); color: var(--bg); transform: translateY(-2px); }
+
+  /* ============================================================
+     STUDIO HEADER — fixed, minimal, tells you what this is
+     ============================================================ */
+  #studio-header{
+    position: fixed; top:0; left:0; right:0; z-index: 40;
+    display:flex; align-items:flex-start; justify-content:space-between;
+    padding: 22px 26px; pointer-events:none;
+  }
+  .brand{ pointer-events:auto; }
+  .brand-name{
+    font-family:'Fraunces', serif; font-weight:600; font-size: 15px; letter-spacing:.01em;
+  }
+  .brand-tag{
+    font-family:'JetBrains Mono', monospace; font-size: 10.5px; color: var(--ink-soft);
+    letter-spacing:.04em; margin-top:3px;
+  }
+  .brand-hint{
+    pointer-events:auto; text-align:right; font-family:'JetBrains Mono', monospace;
+    font-size: 10.5px; color: var(--ink-soft); line-height:1.7; letter-spacing:.02em;
+  }
+
+  /* ============================================================
+     CANVAS — the moodboard desk. Cards live here.
+     ============================================================ */
+  #canvas{
+    position: fixed; inset:0;
+    background: var(--canvas-bg);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #canvas-inner{
+    position: relative;
+    width: 100%;
+    min-height: 100%;
+  }
+
+  /* ============================================================
+     CARD — polaroid tearsheet front / dev spec-sheet back
+     ============================================================ */
+  .card{
+    position:absolute;
+    width: 186px; height: 250px;
+    left:0; top:0;
+    touch-action: none;
+    cursor: grab;
+    will-change: left, top;
+  }
+  .card.dragging{ cursor: grabbing; z-index: 999 !important; }
+
+  .card-tilt{
+    width:100%; height:100%;
+    transform: rotate(var(--r, 0deg));
+    transition: transform .25s ease;
+  }
+  .card:hover .card-tilt{ transform: rotate(var(--r,0deg)) scale(1.045); }
+  .card.dragging .card-tilt{ transform: rotate(var(--r,0deg)) scale(1.06); transition:none; }
+
+  .card-perspective{ width:100%; height:100%; perspective: 1400px; }
+
+  .card-inner{
+    position:relative; width:100%; height:100%;
+    transform-style: preserve-3d;
+    transition: transform .8s cubic-bezier(.22,.9,.24,1);
+  }
+  .card.flipped .card-inner{ transform: rotateY(180deg); }
+
+  .card-face{
+    position:absolute; inset:0;
+    -webkit-backface-visibility:hidden; backface-visibility:hidden;
+    border-radius:3px;
+    box-shadow: 0 10px 26px -8px var(--shadow), 0 2px 6px -2px var(--shadow);
+    overflow:hidden;
+  }
+
+  /* FRONT — polaroid / tearsheet */
+  .card-front{
+    background: var(--paper);
+    border: 1px solid var(--paper-edge);
+    padding: 9px 9px 0 9px;
+    display:flex; flex-direction:column;
+  }
+  .photo-wrap{
+    position:relative; width:100%; flex: 1 1 auto; overflow:hidden;
+    background: var(--ink); border-radius:1px;
+  }
+  .photo-wrap img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter: saturate(1.02) contrast(1.02);
+  }
+  .tape{
+    position:absolute; top:-10px; left:50%; transform: translateX(-50%) rotate(-3deg);
+    width: 58px; height: 20px;
+    background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.45));
+    border: 1px solid rgba(255,255,255,.6);
+    opacity:.85; z-index:2;
+  }
+  html[data-theme="dark"] .tape{ background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.1)); border-color: rgba(255,255,255,.18); }
+  .pin{
+    position:absolute; top:6px; right:8px; width:9px; height:9px; border-radius:50%;
+    background: var(--rose); box-shadow: 0 1px 3px rgba(0,0,0,.4); z-index:3;
+  }
+  .front-caption{
+    font-family:'Fraunces', serif; font-style:italic; font-weight:450;
+    font-size: 12.5px; line-height:1.32; color: var(--ink);
+    padding: 9px 2px 12px; flex-shrink:0;
+  }
+  .front-index{
+    position:absolute; bottom:8px; right:9px;
+    font-family:'JetBrains Mono', monospace; font-size:9px; color: var(--ink-soft);
+    letter-spacing:.05em;
+  }
+
+  /* BACK — translucent UI blueprint / code spec sheet */
+  .card-back{
+    transform: rotateY(180deg);
+    background: var(--code-bg);
+    color: #e7e6e3;
+    padding: 16px 15px;
+    font-family:'JetBrains Mono', monospace;
+    display:flex; flex-direction:column;
+  }
+  .card-back::before{
+    content:"";
+    position:absolute; inset:0; pointer-events:none;
+    background-image: linear-gradient(var(--code-line) 1px, transparent 1px);
+    background-size: 100% 20px;
+    opacity:.5;
+  }
+  .back-tag{
+    font-size: 9.5px; color: var(--rose); letter-spacing:.08em;
+    margin-bottom: 8px; position:relative;
+  }
+  .back-selector{ font-size: 10.5px; color:#f3efe8; margin-bottom:4px; position:relative; }
+  .back-selector .punct{ color: var(--gold); }
+  .back-props{ font-size: 9.5px; line-height:1.75; color:#c9c6bf; position:relative; flex:1; overflow:hidden; }
+  .back-props .k{ color:#e0a9b8; }
+  .back-props .v{ color:#e8d3ae; }
+  .back-note{
+    font-family:'Fraunces', serif; font-style:italic; font-size:10.5px;
+    line-height:1.5; color:#f3efe8; border-top: 1px dashed var(--code-line);
+    padding-top:8px; margin-top:6px; position:relative;
+  }
+
+  /* ============================================================
+     DOCK — designer mode controls
+     ============================================================ */
+  #dock{
+    position: fixed; left:50%; bottom: 22px; transform: translateX(-50%);
+    z-index: 60;
+    display:flex; align-items:center; gap: 4px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px;
+    box-shadow: 0 14px 34px -12px var(--shadow);
+  }
+  .dock-btn{
+    display:flex; align-items:center; gap: 8px;
+    font-family:'Inter', sans-serif; font-size: 12.5px; font-weight:500;
+    color: var(--ink); background: transparent; border: none; cursor:pointer;
+    padding: 11px 16px; border-radius: 999px;
+    transition: background .25s ease, color .25s ease;
+    white-space: nowrap;
+  }
+  .dock-btn:hover{ background: var(--ink); color: var(--bg); }
+  .dock-btn svg{ width:15px; height:15px; }
+  .dock-sep{ width:1px; height:20px; background: var(--line); margin:0 2px; }
+
+  /* toast */
+  #toast{
+    position: fixed; left:50%; bottom: 92px; transform: translateX(-50%) translateY(8px);
+    z-index: 70; opacity:0; pointer-events:none;
+    background: var(--ink); color: var(--bg);
+    font-family:'JetBrains Mono', monospace; font-size:11.5px; letter-spacing:.03em;
+    padding: 9px 16px; border-radius: 999px;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  #toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 700px){
+    .card{ width: 140px; height: 190px; }
+    .front-caption{ font-size: 10.5px; }
+    #studio-header{ padding: 16px 16px; }
+    .brand-hint{ display:none; }
+    .dock-btn span.label{ display:none; }
+    .dock-btn{ padding: 12px; }
+    .intro-title{ font-size: 26px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card-inner, .card-tilt, #intro, #toast{ transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<!-- ================= INTRO ================= -->
+<div id="intro">
+  <div class="intro-eyebrow">Friendship Day · MCASC Pune Edition</div>
+  <div class="intro-title">
+    For the one who color-corrects a group photo <b>before</b> she even opens it —
+  </div>
+  <p class="intro-sub">a moodboard, built the way your best friend the developer thinks in — draggable, flippable, occasionally buggy with love.</p>
+  <button class="intro-enter" id="enterBtn">
+    Enter the Studio <span aria-hidden="true">→</span>
+  </button>
+</div>
+
+<!-- ================= HEADER ================= -->
+<header id="studio-header">
+  <div class="brand">
+    <div class="brand-name">Sakshi's Studio Canvas</div>
+    <div class="brand-tag">// Dev ✕ Designer Edition — @sakshi_giram_25</div>
+  </div>
+  <div class="brand-hint">drag to rearrange · click a card to flip<br>15 files loaded · unsaved changes always</div>
+</header>
+
+<!-- ================= CANVAS ================= -->
+<main id="canvas">
+  <div id="canvas-inner"></div>
+</main>
+
+<!-- ================= DOCK ================= -->
+<nav id="dock">
+  <button class="dock-btn" id="btnArrange" title="Auto Arrange">
+    <i data-lucide="layout-grid"></i><span class="label">Auto Arrange</span>
+  </button>
+  <div class="dock-sep"></div>
+  <button class="dock-btn" id="btnScatter" title="Scatter Moodboard">
+    <i data-lucide="shuffle"></i><span class="label">Scatter Moodboard</span>
+  </button>
+  <div class="dock-sep"></div>
+  <button class="dock-btn" id="btnDark" title="Dark Room Vibe">
+    <i data-lucide="moon"></i><span class="label">Dark Room Vibe</span>
+  </button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+/* ==================================================================
+   STATE
+   ------------------------------------------------------------------
+   `layoutMode` tracks whether the desk is "scattered" or "grid",
+   purely so Auto Arrange / Scatter know what to animate from.
+   `zTop` is a running counter — every drag/flip bumps a card above
+   the rest, same trick a real desk of photos would need.
+   ================================================================== */
+let layoutMode = 'scattered';
+let zTop = 10;
+
+/* ------------------------------------------------------------------
+   CONTENT — 15 cards. Each one pairs a front caption (the designer's
+   voice) with a back "spec sheet" (the developer's voice), so the
+   flip literally is the Dev ✕ Designer bit of the concept.
+   ------------------------------------------------------------------ */
+const CARDS = [
+  {
+    caption: "Second year, textile lab. You said 'the fabric has an opinion, listen to it' and I still don't know what that means.",
+    tag: "Memory_Log #01",
+    selector: ".canteen-critique",
+    props: { fabric: '"banarasi brocade"', mood: '"dusty-rose, unbothered"', deadline: "yesterday" },
+    note: "you were right about the fabric. it always is."
+  },
+  {
+    caption: "The MCASC degree show, 11:58pm setup. Three of us, one glue gun, zero working brain cells.",
+    tag: "Memory_Log #02",
+    selector: ".degree-show::before",
+    props: { squad_size: 3, glue_guns: 1, panic_level: "critical" },
+    note: "somehow the boards still looked better than mine."
+  },
+  {
+    caption: "You sketch faster than I can debug. That's not a compliment, that's just a fact I have to live with.",
+    tag: "Memory_Log #03",
+    selector: ".sketchbook:nth-child(9999)",
+    props: { render_time: "0.4s", my_render_time: "∞" },
+    note: "some people compile, some people draft. same energy."
+  },
+  {
+    caption: "Farewell function, this dusty-rose lehenga you picked apart for a week before deciding it was 'the one.'",
+    tag: "Memory_Log #04",
+    selector: ".final-fitting",
+    props: { revisions: 14, verdict: '"the one"', confidence: "finally 100%" },
+    note: "worth every one of the fourteen tries."
+  },
+  {
+    caption: "MCASC canteen, 4pm chai, you redesigning my portfolio grid on a napkin because 'the spacing was hurting you.'",
+    tag: "Memory_Log #05",
+    selector: ".napkin-wireframe",
+    props: { medium: '"paper napkin"', margin_opinions: "strong" },
+    note: "the napkin version shipped better than my figma file."
+  },
+  {
+    caption: "Every squad photo has you adjusting someone's dupatta a second before the shutter goes off. Every single one.",
+    tag: "Memory_Log #06",
+    selector: ".pre-shutter-fix",
+    props: { reaction_time: "0.2s", frequency: "always" },
+    note: "you're the unpaid stylist of every group photo we own."
+  },
+  {
+    caption: "The day you told me 'good design is just good manners' and I stole that line for my thesis viva.",
+    tag: "Memory_Log #07",
+    selector: ".viva-defense",
+    props: { line_stolen: true, credited: "quietly, now, in writing" },
+    note: "consider this the footnote I owed you."
+  },
+  {
+    caption: "You color-code your moodboards. I color-code my terminal. We are, somehow, the same person.",
+    tag: "Memory_Log #08",
+    selector: ".shared-brain",
+    props: { your_palette: "5 swatches", my_palette: "5 hex codes" },
+    note: "different tools, identical need for control."
+  },
+  {
+    caption: "That semester you hand-embroidered a sample at 2am because the machine version 'had no soul.'",
+    tag: "Memory_Log #09",
+    selector: ".2am-embroidery",
+    props: { method: '"by hand"', reason: '"soul, apparently"' },
+    note: "the machine one was fine. this one was better."
+  },
+  {
+    caption: "The photoshoot day, this exact gold brocade set, and you still asked 'does this read as too much?' Sakshi. No.",
+    tag: "Memory_Log #10",
+    selector: ".too-much-check",
+    props: { verdict: "never too much", asked_anyway: true },
+    note: "you always ask. the answer is always no."
+  },
+  {
+    caption: "Group project, MCASC 3rd year — you carried the layout, I carried the excuses. Fair division of labour.",
+    tag: "Memory_Log #11",
+    selector: ".group-project-split",
+    props: { your_contribution: "90%", my_contribution: '"moral support"' },
+    note: "the grade was yours. the credit should've been too."
+  },
+  {
+    caption: "Every fitting room mirror selfie has the same caption energy: 'idk if this works.' It always works.",
+    tag: "Memory_Log #12",
+    selector: ".mirror-selfie",
+    props: { self_doubt: "recurring", accuracy: "0%" },
+    note: "for the record — it has never once not worked."
+  },
+  {
+    caption: "You once fixed my entire portfolio layout in the time it took me to explain the problem. Ten minutes flat.",
+    tag: "Memory_Log #13",
+    selector: ".portfolio-rescue",
+    props: { time_taken: "10min", debt_owed: "eternal" },
+    note: "this website is my very late thank-you."
+  },
+  {
+    caption: "MCASC hallway, last week of college, taking photos we swore we'd never need — and now they're all I've got.",
+    tag: "Memory_Log #14",
+    selector: ".hallway-goodbye",
+    props: { swore_wed_forget: true, forgot: false },
+    note: "turns out we needed every single one."
+  },
+  {
+    caption: "Happy Friendship Day, Sakshi. From the wireframes to the runway, you made everything look intentional — including us.",
+    tag: "Memory_Log #15",
+    selector: ".friendship-day::after",
+    props: { status: '"still best friends"', build: "passing", love: "shipped" },
+    note: "— from your developer best friend, Ayan."
+  }
+];
+
+/* ------------------------------------------------------------------
+   BUILD CARDS — create DOM once, position them scattered.
+   Image source: picsum, one distinct seed per card (random=1..15)
+   per brief. Front/back markup assembled from the CARDS content.
+   ------------------------------------------------------------------ */
+const canvas = document.getElementById('canvas');
+const canvasInner = document.getElementById('canvas-inner');
+const cardEls = [];
+
+function buildCards(){
+  CARDS.forEach((data, i) => {
+    const id = i + 1;
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.dataset.id = id;
+
+    el.innerHTML = `
+      <div class="card-tilt">
+        <div class="card-perspective">
+          <div class="card-inner">
+            <div class="card-face card-front">
+              <div class="tape"></div>
+              <div class="photo-wrap">
+                <div class="pin"></div>
+                <img src="https://picsum.photos/600/750?random=${id}" alt="Studio moodboard photo ${id}" draggable="false" oncontextmenu="return false;">
+              </div>
+              <div class="front-caption">${data.caption}</div>
+              <div class="front-index">#${String(id).padStart(2,'0')}</div>
+            </div>
+            <div class="card-face card-back">
+              <div class="back-tag">${data.tag}</div>
+              <div class="back-selector">${data.selector} <span class="punct">{</span></div>
+              <div class="back-props">
+                ${Object.entries(data.props).map(([k,v]) => `<div><span class="k">${k}</span>: <span class="v">${v}</span>;</div>`).join('')}
+                <div class="punct">}</div>
+              </div>
+              <div class="back-note">${data.note}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    canvasInner.appendChild(el);
+    cardEls.push(el);
+  });
+}
+
+/* ------------------------------------------------------------------
+   SCATTER — place all cards at natural, slightly-overlapping angles
+   across the available canvas, like a real desk. Re-usable so the
+   "Scatter Moodboard" dock button can call it any time.
+   ------------------------------------------------------------------ */
+function scatterLayout(animate){
+  layoutMode = 'scattered';
+  const rect = canvas.getBoundingClientRect();
+  const isMobile = window.innerWidth < 700;
+  const cw = isMobile ? 140 : 186;
+  const ch = isMobile ? 190 : 250;
+  const padTop = isMobile ? 96 : 120;
+  const padBottom = 110;
+  const usableW = Math.max(rect.width - cw - 24, 40);
+  const usableH = Math.max(rect.height - padTop - padBottom - ch, 40);
+
+  cardEls.forEach((el) => {
+    // reset to natural card size (grid mode may have shrunk them)
+    const targetLeft = 12 + Math.random() * usableW;
+    const targetTop  = padTop + Math.random() * usableH;
+    const rot = (Math.random() * 30 - 15).toFixed(2);
+
+    el.style.setProperty('--r', rot + 'deg');
+
+    if (animate && window.gsap){
+      gsap.to(el, {
+        left: targetLeft, top: targetTop,
+        width: cw, height: ch,
+        duration: 0.9, ease: 'power3.inOut'
+      });
+    } else {
+      el.style.left = targetLeft + 'px';
+      el.style.top = targetTop + 'px';
+      el.style.width = cw + 'px';
+      el.style.height = ch + 'px';
+    }
+  });
+}
+
+/* ------------------------------------------------------------------
+   AUTO ARRANGE — a clean 3-column editorial bento grid (2 columns
+   on narrow screens), animated into place with GSAP, rotation
+   eased back to 0 for that "just tidied the desk" feel.
+   ------------------------------------------------------------------ */
+function gridLayout(){
+  layoutMode = 'grid';
+  const rect = canvas.getBoundingClientRect();
+  const isMobile = window.innerWidth < 700;
+  const cols = isMobile ? 2 : 3;
+  const rows = Math.ceil(CARDS.length / cols);
+  const gap = isMobile ? 14 : 22;
+  const padX = isMobile ? 16 : 36;
+  const padTop = isMobile ? 90 : 118;
+
+  const cw = (rect.width - padX * 2 - gap * (cols - 1)) / cols;
+  const ch = cw * 1.34;
+
+  cardEls.forEach((el, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const left = padX + col * (cw + gap);
+    const top = padTop + row * (ch + gap);
+
+    el.style.setProperty('--r', '0deg');
+
+    if (window.gsap){
+      gsap.to(el, {
+        left, top, width: cw, height: ch,
+        duration: 0.85, ease: 'power3.inOut', delay: (row * cols + col) * 0.02
+      });
+    } else {
+      el.style.left = left + 'px';
+      el.style.top = top + 'px';
+      el.style.width = cw + 'px';
+      el.style.height = ch + 'px';
+    }
+  });
+}
+
+/* ------------------------------------------------------------------
+   DRAG + CLICK-TO-FLIP — one pointer handler tells the two apart
+   by movement distance. Under threshold = flip. Over = drag.
+   Uses Pointer Events so mouse, touch and pen all just work.
+   ------------------------------------------------------------------ */
+function enableDrag(el){
+  let startX = 0, startY = 0, originLeft = 0, originTop = 0;
+  let dragging = false;
+  const DRAG_THRESHOLD = 6;
+
+  el.addEventListener('pointerdown', (e) => {
+    el.setPointerCapture(e.pointerId);
+    startX = e.clientX;
+    startY = e.clientY;
+    originLeft = parseFloat(el.style.left) || 0;
+    originTop = parseFloat(el.style.top) || 0;
+    dragging = false;
+    zTop += 1;
+    el.style.zIndex = zTop;
+  });
+
+  el.addEventListener('pointermove', (e) => {
+    if (!el.hasPointerCapture(e.pointerId)) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (!dragging && Math.hypot(dx, dy) > DRAG_THRESHOLD){
+      dragging = true;
+      el.classList.add('dragging');
+    }
+    if (dragging){
+      const rect = canvas.getBoundingClientRect();
+      const w = el.offsetWidth, h = el.offsetHeight;
+      let nl = originLeft + dx;
+      let nt = originTop + dy;
+      nl = Math.max(-w * 0.3, Math.min(rect.width - w * 0.7, nl));
+      nt = Math.max(-h * 0.15, Math.min(canvasInner.offsetHeight - h * 0.4, nt));
+      el.style.left = nl + 'px';
+      el.style.top = nt + 'px';
+    }
+  });
+
+  el.addEventListener('pointerup', (e) => {
+    el.releasePointerCapture(e.pointerId);
+    el.classList.remove('dragging');
+    if (!dragging){
+      el.classList.toggle('flipped');
+    }
+    dragging = false;
+  });
+
+  el.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+
+/* ------------------------------------------------------------------
+   DOCK ACTIONS
+   ------------------------------------------------------------------ */
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+document.getElementById('btnArrange').addEventListener('click', () => {
+  gridLayout();
+  showToast('desk, tidied — a proper 3-column grid');
+});
+
+document.getElementById('btnScatter').addEventListener('click', () => {
+  cardEls.forEach(el => el.classList.remove('flipped'));
+  scatterLayout(true);
+  showToast('back to the beautiful chaos');
+});
+
+document.getElementById('btnDark').addEventListener('click', () => {
+  const root = document.documentElement;
+  const dark = root.getAttribute('data-theme') === 'dark';
+  root.setAttribute('data-theme', dark ? 'light' : 'dark');
+  document.getElementById('btnDark').querySelector('i').setAttribute('data-lucide', dark ? 'moon' : 'sun');
+  if (window.lucide) lucide.createIcons();
+  showToast(dark ? 'lights back on' : 'dark room vibe — colours pop now');
+});
+
+/* ------------------------------------------------------------------
+   INTRO
+   ------------------------------------------------------------------ */
+document.getElementById('enterBtn').addEventListener('click', () => {
+  document.getElementById('intro').classList.add('hidden');
+});
+
+/* ------------------------------------------------------------------
+   INIT
+   ------------------------------------------------------------------ */
+window.addEventListener('load', () => {
+  buildCards();
+  cardEls.forEach(enableDrag);
+  scatterLayout(false);
+  if (window.lucide) lucide.createIcons();
+});
+
+window.addEventListener('resize', () => {
+  if (layoutMode === 'grid') gridLayout(); else scatterLayout(false);
+});
+
+/* ==================================================================
+   HIDDEN DEVELOPER CONSOLE EASTER EGG
+   For the designer who always checks the inspector out of habit.
+   ================================================================== */
+(function easterEgg(){
+  const heart = `
+%c
+   ✦     ✦
+ ██  ██ ██  ██
+██████ ██████
+ ████████████
+   ████████
+     ████
+      ██
+`;
+  console.log(heart, 'color:#e05375; font-family:monospace; font-weight:bold; font-size:12px;');
+  console.log('%cSakshi\\'s Studio Canvas', 'font-family: Georgia, serif; font-size: 22px; font-weight:bold; color:#e05375;');
+  console.log('%c// Dev ✕ Designer Edition — a Friendship Day build', 'font-family: monospace; font-size: 12px; color:#c39a6b;');
+  console.log('%c', 'padding:2px;');
+  console.log(
+    '%cHey Sakshi — found this? Of course you did, you always check the inspector.\n' +
+    'This whole thing is basically our college group chat turned into a website:\n' +
+    'messy, a little chaotic, but everything in the right place if you look close.\n\n' +
+    'Thanks for redesigning half my portfolio, arguing with me about spacing,\n' +
+    'and being the only person who can make a farewell photoshoot feel like a\n' +
+    'runway show. MCASC was better with you in it. So is everything since.\n\n' +
+    'Happy Friendship Day.\n' +
+    '— Ayan',
+    'font-family: Georgia, serif; font-size: 13px; color:#1c1b1a; line-height:1.6;'
+  );
+})();
+</script>
+</body>
+</html>
