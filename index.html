@@ -286,6 +286,16 @@
   }
   #toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
 
+  #credit-badge{
+    position: fixed; right: 16px; bottom: 16px; z-index: 55;
+    font-family:'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing:.03em;
+    color: var(--ink-soft); background: var(--paper); border: 1px solid var(--line);
+    padding: 6px 10px; border-radius: 999px; pointer-events:none;
+  }
+  @media (max-width: 700px){
+    #credit-badge{ right: 10px; bottom: 10px; font-size: 8.5px; padding:5px 9px; }
+  }
+
   @media (max-width: 700px){
     .card{ width: 140px; height: 190px; }
     .front-caption{ font-size: 10.5px; }
@@ -323,8 +333,10 @@
     <div class="brand-name">Sakshi's Studio Canvas</div>
     <div class="brand-tag">// Dev ✕ Designer Edition — @sakshi_giram_25</div>
   </div>
-  <div class="brand-hint">drag to rearrange · click a card to flip<br>15 files loaded · unsaved changes always</div>
+  <div class="brand-hint">drag to rearrange · click a card to flip<br>made by Ayan, for his best friend Sakshi</div>
 </header>
+
+<div id="credit-badge">made by Ayan ✕ for Sakshi</div>
 
 <!-- ================= CANVAS ================= -->
 <main id="canvas">
@@ -497,7 +509,7 @@ function buildCards(){
               <div class="tape"></div>
               <div class="photo-wrap">
                 <div class="pin"></div>
-                <img src="https://picsum.photos/600/750?random=${id}" alt="Studio moodboard photo ${id}" draggable="false" oncontextmenu="return false;">
+                <img src="images/sakshi-${String(((id - 1) % 8) + 1).padStart(2,'0')}.jpg" alt="Sakshi — studio moodboard photo ${id}" draggable="false" oncontextmenu="return false;">
               </div>
               <div class="front-caption">${data.caption}</div>
               <div class="front-index">#${String(id).padStart(2,'0')}</div>
@@ -739,4 +751,4 @@ window.addEventListener('resize', () => {
 })();
 </script>
 </body>
-  </html>
+</html>
