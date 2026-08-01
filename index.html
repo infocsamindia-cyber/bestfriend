@@ -163,6 +163,10 @@
     25%{ transform: translateX(-8px); }
     75%{ transform: translateX(8px); }
   }
+  .login-credit{
+    margin-top: 34px; font-family:'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing:.06em; color: var(--ink-soft);
+  }
 
   /* ============================================================
      STUDIO HEADER — fixed, minimal, tells you what this is
@@ -250,7 +254,7 @@
     background: var(--ink); border-radius:1px;
   }
   .photo-wrap img{
-    width:100%; height:100%; object-fit:cover; display:block;
+    width:100%; height:100%; object-fit:cover; object-position: 50% 12%; display:block;
     filter: saturate(1.02) contrast(1.02);
   }
   /* graceful fallback if a photo genuinely can't load — a soft fabric-swatch
@@ -400,6 +404,7 @@
       <button type="submit" class="login-submit">Unlock Studio →</button>
       <p class="login-feedback" id="loginFeedback"></p>
     </form>
+    <div class="login-credit">Created by Ayan</div>
   </div>
 </div>
 
@@ -731,14 +736,16 @@ function gridLayout(){
    Uses Pointer Events so mouse, touch and pen all just work.
    ------------------------------------------------------------------ */
 function enableDrag(el){
-  let startX = 0, startY = 0, originLeft = 0, originTop = 0;
+  let startX = 0, startY = 0, originLeft = 0, originTop = 0, startTime = 0;
   let dragging = false;
-  const DRAG_THRESHOLD = 6;
+  const DRAG_THRESHOLD = 10;
+  const TAP_MAX_DURATION = 350; // ms — beyond this, a still finger is a hesitant scroll/hold, not a tap
 
   el.addEventListener('pointerdown', (e) => {
     el.setPointerCapture(e.pointerId);
     startX = e.clientX;
     startY = e.clientY;
+    startTime = Date.now();
     originLeft = parseFloat(el.style.left) || 0;
     originTop = parseFloat(el.style.top) || 0;
     dragging = false;
@@ -769,7 +776,8 @@ function enableDrag(el){
   el.addEventListener('pointerup', (e) => {
     el.releasePointerCapture(e.pointerId);
     el.classList.remove('dragging');
-    if (!dragging){
+    const heldTime = Date.now() - startTime;
+    if (!dragging && heldTime <= TAP_MAX_DURATION){
       el.classList.toggle('flipped');
     }
     dragging = false;
