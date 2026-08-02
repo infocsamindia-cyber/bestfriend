@@ -169,6 +169,67 @@
   }
 
   /* ============================================================
+     HOW TO USE — a one-time guide right after login
+     ============================================================ */
+  #howto-modal{
+    position: fixed; inset:0; z-index: 105;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(0,0,0,0.45);
+    padding: 7vw;
+    transition: opacity .4s ease, visibility .4s ease;
+  }
+  #howto-modal.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  .howto-card{
+    position: relative; width:100%; max-width: 380px;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 16px; padding: 30px 26px 26px;
+    box-shadow: 0 24px 60px -18px rgba(0,0,0,0.5);
+  }
+  .howto-close{
+    position:absolute; top:14px; right:14px; width:30px; height:30px;
+    border-radius:50%; border:1px solid var(--line); background:transparent;
+    color: var(--ink); font-size:18px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .howto-eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing:.12em;
+    text-transform:uppercase; color: var(--rose); margin-bottom: 8px;
+  }
+  .howto-title{
+    font-family:'Fraunces', serif; font-weight:450; font-style:italic;
+    font-size: 24px; margin: 0 0 18px; color: var(--ink);
+  }
+  .howto-list{
+    list-style:none; margin:0 0 22px; padding:0; text-align:left;
+  }
+  .howto-list li{
+    font-family:'Inter', sans-serif; font-size: 13px; line-height:1.55;
+    color: var(--ink-soft); padding: 9px 0; border-top: 1px dashed var(--line);
+  }
+  .howto-list li:first-child{ border-top:none; }
+  .howto-list li b{ color: var(--ink); font-weight:600; }
+  .howto-cta{
+    width:100%; font-family:'JetBrains Mono', monospace; font-size: 13px;
+    letter-spacing:.04em; padding: 13px; border-radius: 10px; border: none;
+    background: var(--ink); color: var(--bg); cursor:pointer;
+    transition: transform .25s ease;
+  }
+  .howto-cta:hover{ transform: translateY(-2px); }
+
+  /* mute toggle, sits beside the credit badge */
+  #mute-toggle{
+    position: fixed; right: 16px; bottom: 52px; z-index: 480;
+    width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--paper); border: 1px solid var(--line); color: var(--ink-soft);
+    cursor:pointer;
+  }
+  #mute-toggle svg{ width:15px; height:15px; }
+  @media (max-width: 700px){
+    #mute-toggle{ right: 10px; bottom: 44px; width:30px; height:30px; }
+  }
+
+  /* ============================================================
      STUDIO HEADER — fixed, minimal, tells you what this is
      ============================================================ */
   #studio-header{
@@ -409,6 +470,24 @@
   </div>
 </div>
 
+<!-- ================= HOW TO USE (shown once, right after login) ================= -->
+<div id="howto-modal" class="hidden">
+  <div class="howto-card">
+    <button id="howtoClose" class="howto-close" aria-label="Close">×</button>
+    <div class="howto-eyebrow">// Quick Guide</div>
+    <h2 class="howto-title">studio kaise chalta hai</h2>
+    <ul class="howto-list">
+      <li><b>Card pe tap karo</b> — photo palat ke peeche ka note dikhega. Dobara tap karo, wapas photo aa jayegi.</li>
+      <li><b>Card ko hold karke drag karo</b> — thoda der finger tika ke rakho, phir card ko kahin bhi le jao.</li>
+      <li><b>Auto Arrange</b> (grid icon) — sab cards ek neat grid mein set ho jayenge.</li>
+      <li><b>Scatter Moodboard</b> (shuffle icon) — sab cards wapas randomly bikhar jayenge aur unflip ho jayenge.</li>
+      <li><b>Light / Dark</b> (sun/moon icon) — studio ka theme switch karega.</li>
+      <li><b>Phone ko halka sa hilao</b> — desk pe rakhe cards bhi hil jayenge, jaise real photos ho.</li>
+    </ul>
+    <button id="howtoGotIt" class="howto-cta">Got it, let's go →</button>
+  </div>
+</div>
+
 <!-- ================= INTRO ================= -->
 <div id="intro">
   <div class="intro-eyebrow">Friendship Day · Dev ✕ Designer Edition</div>
@@ -421,6 +500,9 @@
   </button>
 </div>
 
+<!-- ================= BACKGROUND MUSIC ================= -->
+<audio id="bgm" src="audio/theme.mp3" loop preload="auto"></audio>
+
 <!-- ================= HEADER ================= -->
 <header id="studio-header">
   <div class="brand">
@@ -430,7 +512,10 @@
   <div class="brand-hint">drag to rearrange · click a card to flip<br>made by Ayan, for his best friend Sakshi</div>
 </header>
 
-<div id="credit-badge">made by Ayan ✕ for Sakshi</div>
+<div id="credit-badge">made by Ayan for Sakshi</div>
+<button id="mute-toggle" aria-label="Toggle music" title="Toggle music">
+  <i data-lucide="volume-2"></i>
+</button>
 
 <!-- ================= CANVAS ================= -->
 <main id="canvas">
@@ -868,6 +953,8 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
 
   if (pass === 'sakshi'){
     document.getElementById('login-gate').classList.add('hidden');
+    document.getElementById('howto-modal').classList.remove('hidden');
+    onLoginSuccess(); // music + tilt permission + surprise timer — all fired from this real tap
   } else {
     feedback.textContent = "not it — hint: it's the name on the door";
     card.classList.remove('shake');
@@ -875,6 +962,107 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
     card.classList.add('shake');
   }
 });
+
+/* ------------------------------------------------------------------
+   HOW TO USE — closes either via the × or the CTA, same result.
+   ------------------------------------------------------------------ */
+function closeHowTo(){
+  document.getElementById('howto-modal').classList.add('hidden');
+}
+document.getElementById('howtoClose').addEventListener('click', closeHowTo);
+document.getElementById('howtoGotIt').addEventListener('click', closeHowTo);
+
+/* ------------------------------------------------------------------
+   MUSIC — starts the moment she logs in (a real tap, so autoplay
+   rules allow it). Mute button just toggles it, nothing fancier.
+   ------------------------------------------------------------------ */
+const bgm = document.getElementById('bgm');
+const muteBtn = document.getElementById('mute-toggle');
+muteBtn.addEventListener('click', () => {
+  bgm.muted = !bgm.muted;
+  muteBtn.querySelector('i').setAttribute('data-lucide', bgm.muted ? 'volume-x' : 'volume-2');
+  if (window.lucide) lucide.createIcons();
+});
+
+/* ------------------------------------------------------------------
+   TILT / SHAKE — gently nudges every card when the phone moves,
+   like loose photos on a real desk. iOS needs an explicit
+   permission prompt, which must come from a real tap — the login
+   submit counts, so we ask for it right there.
+   ------------------------------------------------------------------ */
+let lastShakeTime = 0;
+function handleMotion(event){
+  const now = Date.now();
+  if (now - lastShakeTime < 550) return; // small cooldown so one shake = one nudge, not a blur
+  const a = event.accelerationIncludingGravity || event.acceleration;
+  if (!a) return;
+  const magnitude = Math.abs(a.x || 0) + Math.abs(a.y || 0) + Math.abs(a.z || 0);
+  if (magnitude > 26){
+    lastShakeTime = now;
+    cardEls.forEach((el) => {
+      const nudgeX = (Math.random() * 34 - 17);
+      const nudgeY = (Math.random() * 34 - 17);
+      const curLeft = parseFloat(el.style.left) || 0;
+      const curTop = parseFloat(el.style.top) || 0;
+      if (window.gsap){
+        gsap.to(el, { left: curLeft + nudgeX, top: curTop + nudgeY, duration: 0.5, ease: 'elastic.out(1, 0.5)' });
+      } else {
+        el.style.left = (curLeft + nudgeX) + 'px';
+        el.style.top = (curTop + nudgeY) + 'px';
+      }
+    });
+    showToast('the desk just got bumped 📸');
+  }
+}
+
+function enableTilt(){
+  window.addEventListener('devicemotion', handleMotion);
+}
+
+/* ------------------------------------------------------------------
+   ONE-TIME LOGIN ACTIONS — everything that needs a real user
+   gesture (audio autoplay, iOS motion permission) fires from here.
+   ------------------------------------------------------------------ */
+function onLoginSuccess(){
+  bgm.play().catch(() => { /* autoplay blocked — mute icon still lets her start it manually */ });
+
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+    DeviceMotionEvent.requestPermission().then((state) => {
+      if (state === 'granted') enableTilt();
+    }).catch(() => {});
+  } else {
+    enableTilt();
+  }
+
+  setTimeout(surpriseMoment, 20000);
+}
+
+/* ------------------------------------------------------------------
+   20-SECOND SURPRISE — a one-time little burst of hearts and a
+   warm line, purely because she stuck around this long.
+   ------------------------------------------------------------------ */
+function surpriseMoment(){
+  const layer = document.createElement('div');
+  layer.style.cssText = 'position:fixed;inset:0;z-index:520;pointer-events:none;overflow:hidden;';
+  document.body.appendChild(layer);
+
+  const hearts = ['💗','✨','💌','🌸'];
+  for (let i = 0; i < 22; i++){
+    const span = document.createElement('span');
+    span.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+    span.style.cssText = `position:absolute; left:${Math.random()*100}%; top:-40px; font-size:${14 + Math.random()*16}px; opacity:0;`;
+    layer.appendChild(span);
+    if (window.gsap){
+      gsap.to(span, {
+        top: '110%', opacity: 1, rotation: Math.random() * 180 - 90,
+        duration: 3 + Math.random() * 2, delay: Math.random() * 1.2, ease: 'power1.in',
+        onComplete: () => span.remove()
+      });
+    }
+  }
+  showToast('20 second ho gaye — abhi bhi khush hoon ki tu meri best friend hai 💗');
+  setTimeout(() => layer.remove(), 6500);
+}
 
 /* ------------------------------------------------------------------
    INIT
